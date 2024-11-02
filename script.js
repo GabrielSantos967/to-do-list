@@ -48,7 +48,23 @@ function closeModal() {
     document.getElementById("taskModal").style.display = "none"
 }
 
-function addTask() {
+
+async function saveTask(){
+    const response = await fetch('https://api.vercel.com/v1/blob/upload', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${process.env.VERCEL_BLOB_TOKEN}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(task)
+    });
+
+    const result = await response.json();
+    console.log('Tarefa salva: ', result);
+    return result;
+}
+
+async function addTask() {
     const name = document.getElementById("taskName").value
     const cost = document.getElementById("taskCost").value
     const deadLine = document.getElementById("taskDeadLine").value
@@ -64,6 +80,9 @@ function addTask() {
 
         closeModal();
         displayTask();
+
+        const blobResult = await saveTask(newTask);
+        console.log('Tarefa salva com o ID do Blob', blobResult);
     } else{
         alert("Por favor, preencha todos os campos")
     }
@@ -74,6 +93,18 @@ window.onclick = function(event){
     if (event.target === modal){
         closeModal();
     }
+}
+
+async function getTask(){
+    const response = await fetch(`https://api.vercel.com/v1/blob/${blobId}`, {
+        headers: {
+            'Authorization': `Bearer ${process.env.VERCEL_BLOB_TOKEN}`
+        }
+    });
+
+    const data = await response.jason();
+    console.log('Tarefa recuperada: ', data);
+    return data;
 }
 
 displayTask();
