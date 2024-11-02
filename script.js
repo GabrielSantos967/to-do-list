@@ -61,30 +61,30 @@ async function saveTask(){
 
     const result = await response.json();
     console.log('Tarefa salva: ', result);
+    blobId.push(result.id);
     return result;
 }
 
 async function addTask() {
-    const name = document.getElementById("taskName").value
-    const cost = document.getElementById("taskCost").value
-    const deadLine = document.getElementById("taskDeadLine").value
+    const name = document.getElementById("taskName").value;
+    const cost = document.getElementById("taskCost").value;
+    const deadLine = document.getElementById("taskDeadLine").value;
 
-    if(name&&cost&&deadLine) {
-        const formated = formatCurrency(cost)
-        const newTask = {id: taskId++, name: name, cost: formated, deadLine: deadLine};
+    if (name && cost && deadLine) {
+        const formatted = formatCurrency(cost);
+        const newTask = { id: taskId++, name: name, cost: formatted, deadLine: deadLine };
         tasks.push(newTask);
 
-        document.getElementById("taskName").value = ""
-        document.getElementById("taskCost").value = ""
-        document.getElementById("taskDeadLine").value = ""
+        document.getElementById("taskName").value = "";
+        document.getElementById("taskCost").value = "";
+        document.getElementById("taskDeadLine").value = "";
 
         closeModal();
         displayTask();
 
-        const blobResult = await saveTask(newTask);
-        console.log('Tarefa salva com o ID do Blob', blobResult);
-    } else{
-        alert("Por favor, preencha todos os campos")
+        await saveTask(newTask); // Salva a tarefa no Blob
+    } else {
+        alert("Por favor, preencha todos os campos");
     }
 }
 
@@ -95,16 +95,22 @@ window.onclick = function(event){
     }
 }
 
-async function getTask(){
+async function getTask(blobId) {
     const response = await fetch(`https://api.vercel.com/v1/blob/${blobId}`, {
         headers: {
             'Authorization': `Bearer ${process.env.VERCEL_BLOB_TOKEN}`
         }
     });
 
-    const data = await response.jason();
+    const data = await response.json(); // Correção de 'jason()' para 'json()'
     console.log('Tarefa recuperada: ', data);
     return data;
 }
 
+async function init(){
+    await getTasks();
+    displayTask();
+}
+
+init();
 displayTask();
