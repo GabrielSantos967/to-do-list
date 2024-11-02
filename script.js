@@ -1,8 +1,8 @@
-const tasks = [];
-let taskId = 1;
+let tasks = [];
+let taskId = 1; 
 
 function displayTask() {
-    const tableBody = document.getElementById("taskTable");
+    const tableBody = document.getElementById("taskTable").getElementsByTagName('tbody')[0];
     tableBody.innerHTML = "";
 
     tasks.forEach(task => {
@@ -10,31 +10,12 @@ function displayTask() {
         row.innerHTML = `
             <td>${task.id}</td>
             <td>${task.name}</td>
-            <td class="tdcolor">${task.cost}</td>
+            <td>${task.cost}</td>
             <td>${task.deadLine}</td>
+            <td>${task.order}</td>
         `;
         tableBody.appendChild(row);
     });
-
-    color();
-}
-
-function color() {
-    const cells = document.getElementsByClassName("tdcolor");
-
-    for (let cell of cells) {
-        const cost = parseFloat(cell.innerText.replace("R$", "").replace(",", "").trim());
-
-        if (cost >= 1000) {
-            cell.style.background = "rgb(231, 170, 0)";
-        } else {
-            cell.style.background = "";
-        }
-    }
-}
-
-function formatCurrency(value) {
-    return `R$ ${parseFloat(value).toFixed(2).replace(".", ",")}`;
 }
 
 function openModal() {
@@ -45,24 +26,51 @@ function closeModal() {
     document.getElementById("taskModal").style.display = "none";
 }
 
-function addTask() {
+async function addTask() {
     const name = document.getElementById("taskName").value;
     const cost = document.getElementById("taskCost").value;
     const deadLine = document.getElementById("taskDeadLine").value;
 
     if (name && cost && deadLine) {
-        const formatted = formatCurrency(cost);
-        const newTask = { id: taskId++, name: name, cost: formatted, deadLine: deadLine };
+        const newTask = {
+            id: taskId++, 
+            name: name,
+            cost: parseFloat(cost).toFixed(2),
+            deadLine: deadLine,
+            order: tasks.length + 1 
+        };
+
         tasks.push(newTask);
 
-        document.getElementById("taskName").value = "";
-        document.getElementById("taskCost").value = "";
-        document.getElementById("taskDeadLine").value = "";
-
-        closeModal();
+        await saveTask(newTask);
         displayTask();
+        closeModal();
+        clearInputs();
     } else {
         alert("Por favor, preencha todos os campos");
+    }
+}
+
+function clearInputs() {
+    document.getElementById("taskName").value = "";
+    document.getElementById("taskCost").value = "";
+    document.getElementById("taskDeadLine").value = "";
+}
+
+async function saveTask(task) {
+    try {
+        const response = await fetch('save_task.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(task)
+        });
+        
+        const result = await response.json();
+        console.log(result.message);
+    } catch (error) {
+        console.error('Erro ao salvar a tarefa:', error);
     }
 }
 
@@ -71,6 +79,6 @@ window.onclick = function(event) {
     if (event.target === modal) {
         closeModal();
     }
-}
+};
 
-displayTask();
+displayTask(); 

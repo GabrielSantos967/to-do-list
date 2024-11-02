@@ -3,46 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Lista de tarefas</title>
+    <title>Lista de Tarefas</title>
 </head>
 <body>
-    <h1>Lista de tarefas</h1>
+    <h1>Lista de Tarefas</h1>
+    
+    <button onclick="openModal()">Adicionar Tarefa</button>
 
-
-    <div id="taskModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2>Nova tarefa</h2>
-            <label for="">Nome da tarefa</label>
-            <input type="text" id="taskName" required><br><br>
-
-            <label for="">Custo</label>
-            <input type="text" id="taskCost" required><br><br>
-
-            <label for="">Data limite</label>
-            <input type="text" id="taskDeadLine" required><br><br>
-
-            <button onclick="addTask()">Salvar</button>
-        </div>
+    <div id="taskModal" style="display:none;">
+        <h2>Nova Tarefa</h2>
+        <label for="taskName">Nome da Tarefa:</label>
+        <input type="text" id="taskName" required>
+        <label for="taskCost">Custo:</label>
+        <input type="text" id="taskCost" required>
+        <label for="taskDeadLine">Data:</label>
+        <input type="date" id="taskDeadLine" required>
+        <button onclick="addTask()">Salvar Tarefa</button>
+        <button onclick="closeModal()">Cancelar</button>
     </div>
 
-    <table>
+    <table id="taskTable">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Nome da tarefa</th>
+                <th>Nome da Tarefa</th>
                 <th>Custo</th>
-                <th>Data limite</th>
+                <th>Data</th>
+                <th>Ordem</th>
             </tr>
         </thead>
-        <tbody id="taskTable">
-
+        <tbody>
+           
         </tbody>
     </table>
 
-    <button onclick="openModal()">Adicionar tarefa</button>
-
-    <script src="./script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
