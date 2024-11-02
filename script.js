@@ -1,8 +1,8 @@
-const tasks = []
+const tasks = [];
 let taskId = 1;
+const blobIds = []; // Declaração para armazenar os IDs dos blobs
 
 function displayTask() {
-
     const tableBody = document.getElementById("taskTable");
     tableBody.innerHTML = "";
 
@@ -15,41 +15,39 @@ function displayTask() {
             <td>${task.deadLine}</td>
         `;
         tableBody.appendChild(row);
-    })
+    });
 
     color();
-
 }
 
+function color() {
+    const cells = document.getElementsByClassName("tdcolor");
 
-function color(){
-    const cells = document.getElementsByClassName("tdcolor")
+    for (let cell of cells) {
+        const cost = parseFloat(cell.innerText.replace("R$", "").replace(",", "").trim());
 
-    for(let cell of cells){
-        const cost = parseFloat(cell.innerText.replace("R$", "").replace(",", "").trim())
-
-        if (cost >= 1000){
-            cell.style.background = "rgb(231, 170, 0"
-        } else{
-            cell.style.background = ""
+        if (cost >= 1000) {
+            cell.style.background = "rgb(231, 170, 0)"; // Corrigido: falta de fechamento do parêntese
+        } else {
+            cell.style.background = "";
         }
     }
 }
 
-function formatCurrency(value){
-    return `R$ ${parseFloat(value).toFixed(2).replace(".", ",")}`
+function formatCurrency(value) {
+    return `R$ ${parseFloat(value).toFixed(2).replace(".", ",")}`;
 }
 
 function openModal() {
-    document.getElementById("taskModal").style.display = "block"
+    document.getElementById("taskModal").style.display = "block";
 }
 
 function closeModal() {
-    document.getElementById("taskModal").style.display = "none"
+    document.getElementById("taskModal").style.display = "none";
 }
 
-
-async function saveTask(){
+// Função para salvar a tarefa no Vercel Blob
+async function saveTask(task) {
     const response = await fetch('https://api.vercel.com/v1/blob/upload', {
         method: 'POST',
         headers: {
@@ -61,10 +59,11 @@ async function saveTask(){
 
     const result = await response.json();
     console.log('Tarefa salva: ', result);
-    blobId.push(result.id);
+    blobIds.push(result.id); // Armazena o ID do Blob
     return result;
 }
 
+// Função para adicionar uma nova tarefa
 async function addTask() {
     const name = document.getElementById("taskName").value;
     const cost = document.getElementById("taskCost").value;
@@ -88,29 +87,34 @@ async function addTask() {
     }
 }
 
-window.onclick = function(event){
+// Event listener para o modal
+window.onclick = function(event) {
     const modal = document.getElementById("taskModal");
-    if (event.target === modal){
+    if (event.target === modal) {
         closeModal();
     }
 }
 
-async function getTask(blobId) {
-    const response = await fetch(`https://api.vercel.com/v1/blob/${blobId}`, {
-        headers: {
-            'Authorization': `Bearer ${process.env.VERCEL_BLOB_TOKEN}`
-        }
-    });
+// Função para recuperar as tarefas do Vercel Blob
+async function getTasks() {
+    for (const blobId of blobIds) {
+        const response = await fetch(`https://api.vercel.com/v1/blob/${blobId}`, {
+            headers: {
+                'Authorization': `Bearer ${process.env.VERCEL_BLOB_TOKEN}`
+            }
+        });
 
-    const data = await response.json(); // Correção de 'jason()' para 'json()'
-    console.log('Tarefa recuperada: ', data);
-    return data;
+        const data = await response.json(); // Correção de 'jason()' para 'json()'
+        console.log('Tarefa recuperada: ', data);
+        tasks.push(data); // Adiciona a tarefa recuperada à lista de tarefas
+    }
 }
 
-async function init(){
-    await getTask();
-    displayTask();
+// Função de inicialização
+async function init() {
+    await getTasks(); // Recupera tarefas armazenadas
+    displayTask(); // Exibe as tarefas na tabela
 }
 
-init();
-displayTask();
+// Inicia a aplicação
+init(); // Chama a função de inicialização
