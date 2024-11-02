@@ -108,7 +108,7 @@ async function getTask(blobId) {
 }
 
 async function init(){
-    await getTasks();
+    await getTask();
     displayTask();
 }
 
